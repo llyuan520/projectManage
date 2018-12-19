@@ -6,14 +6,19 @@ import {
     Modal,
     message,
     Divider,
-    Card,
   } from 'antd';
 import { connect } from 'dva';
-//import { routerRedux } from 'dva/router';
-import StandardTable from 'components/StandardTable'
-import SearchForm from 'components/SearchForm'
-import styles from './styles.less';
+import SearchTable from 'components/SearchTable'
 const FormItem = Form.Item;
+
+const formItemStyle = {
+    labelCol: {
+        span: 6
+    },
+    wrapperCol: {
+        span: 18
+    }
+};
 
 const fieldsData = (context) => [
     {
@@ -21,27 +26,50 @@ const fieldsData = (context) => [
         fieldName: 'id',
         type: 'input',
         span: 8,
+        formItemStyle,
+        componentProps:{
+        },
+        fieldDecoratorOptions:{
+            //initialValue:  undefined,
+            rules:[
+                {
+                    required:true,
+                    message:'请选择序号'
+                }
+            ]
+        }
     },
     {
         label: '项目名称',
         fieldName: 'name',
         type: 'input',
         span: 8,
-
+        formItemStyle,
+        componentProps:{
+        },
+        fieldDecoratorOptions:{
+            //initialValue: undefined,
+            rules:[
+                {
+                    required:true,
+                    message:'请选择项目名称'
+                }
+            ]
+        }
     },
     {
         label: '法人公司名称',
         fieldName: 'corporateName',
         type: 'input',
         span: 8,
-
+        formItemStyle,
     },
     {
         label: '所属关系',
         fieldName: 'affiliation',
         type: 'input',
         span: 8,
-
+        formItemStyle,
     },
 
 ]
@@ -141,6 +169,8 @@ class Project extends Component {
     }
 
     handleSubmit = values => {
+        console.log(values)
+        debugger
         const { dispatch } = this.props;
         this.setState({
           formValues: values,
@@ -267,46 +297,42 @@ class Project extends Component {
             handleAdd: this.handleAdd,
             handleModalVisible: this.handleModalVisible,
         };
-        const rowSelection = {
-            type: 'checkbox',
-        }
         return (
-            <Fragment>
-                <Card bordered={false}>
-                    <div className={styles.tableList}>
-                        <div className={styles.tableListForm}>
-                            <SearchForm
-                                form={form}
-                                fieldsData={ fieldsData(this) }
-                                handleSubmit={ values => this.handleSubmit(values) }
-                                handleFormReset={ this.handleFormReset }
-                            />
-                        </div>
-                        <div className={styles.tableListOperator}>
-                            <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true, 'add')}>
-                                新建
-                            </Button>
-                            {
-                                selectedRows.length > 0 && (
-                                    <Button icon="delete" type="danger" ghost onClick={this.handleRemoveLotClick}>
-                                        批量删除
-                                    </Button>
-                                )
-                            }
-                        </div>
-                        <StandardTable
-                            selectedRows={selectedRows}
-                            loading={loading}
-                            rowSelection={rowSelection}
-                            data={data}
-                            columns={columns(this)}
-                            onSelectRow={this.handleSelectRows}
-                            onChange={this.handleTableChange}
-                        />
-                    </div>
-                </Card>
+            <SearchTable
+                searchOption={{
+                    form,
+                    fieldsData: fieldsData(this),
+                    handleSubmit: values => this.handleSubmit(values),
+                    handleFormReset: this.handleFormReset 
+                }}
+                tableListOperator={(
+                    <Fragment>
+                        <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true, 'add')}>
+                            新建
+                        </Button>
+                        {
+                            selectedRows.length > 0 && (
+                                <Button icon="delete" type="danger" ghost onClick={this.handleRemoveLotClick}>
+                                    批量删除
+                                </Button>
+                            )
+                        }
+                    </Fragment>
+                )}
+                tableOption={{
+                    selectedRows: selectedRows,
+                    loading: loading,
+                    rowSelection: {
+                        type: 'checkbox',
+                    },
+                    data: data,
+                    columns: columns(this),
+                    onSelectRow: this.handleSelectRows,
+                    onChange: this.handleTableChange,
+                }}
+            >
                 <CreateFormModal {...parentMethods} modalVisible={modalVisible} modalType={modalType} modalFormValues={modalFormValues}/>
-            </Fragment>
+            </SearchTable>
         );
     }
 }
